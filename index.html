@@ -10,14 +10,14 @@
             text-align: center;
             margin: 0;
             padding: 0;
-            background:#1A1A4E;
+            background: #1A1A4E; /* Solid background color */
             color: #FFFFFF;
             overflow: hidden;
         }
         canvas {
             border: 2px solid #FFFFFF;
             margin: 10px;
-            background: linear-gradient(135deg, #2E1A47, #1A1A4E);
+            background: transparent;
         }
         button {
             padding: 8px 16px;
@@ -41,9 +41,6 @@
             width: 100%;
             height: 100%;
             background: transparent;
-        }
-        .screen.active {
-            display: block;
         }
         #message {
             font-size: 24px;
@@ -90,7 +87,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: 2;
         }
         .star {
             position: absolute;
@@ -105,14 +102,62 @@
             0%, 100% { opacity: 0; }
             50% { opacity: 1; }
         }
+        #leaderboard {
+            margin: 20px;
+            font-size: 20px;
+            color: #FFD700;
+        }
+        #leaderboard h2 {
+            margin: 10px;
+        }
+        #leaderboard ol {
+            list-style-type: none;
+            padding: 0;
+        }
+        #leaderboard li {
+            margin: 5px;
+        }
+        #leaderboardModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2E1A47;
+            padding: 20px;
+            border: 2px solid #FF6F61;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+        #leaderboardModal h2 {
+            margin: 10px;
+            color: #FFD700;
+        }
+        #leaderboardModal ol {
+            list-style-type: none;
+            padding: 0;
+        }
+        #leaderboardModal li {
+            margin: 5px;
+        }
+        #closeLeaderboard {
+            margin-top: 10px;
+        }
+        #leaderboardInstructions {
+            font-size: 16px;
+            color: #FFD700;
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
     <!-- Start Screen -->
-    <div id="startScreen" class="screen active">
+    <div id="startScreen" class="screen" style="display: block;">
         <h1>FIND BOXY</h1>
         <p>a colour memory game by Zac Kenny</p>
         <button onclick="startGame()">PLAY</button>
+		<p></p>
+        <button onclick="viewLeaderboard()">View Leaderboard</button>
     </div>
 
     <!-- Screen 1: BoxyGrid -->
@@ -132,15 +177,28 @@
         <canvas id="gridCanvas" width="400" height="400"></canvas>
         <div id="message"></div>
         <button onclick="resetGame()">Restart Game</button>
-        <div id="timer">Time: 0.00s</div>
+        <div id="timer2">Time: 0.00s</div>
     </div>
 
     <!-- Screen 3: Final Screen -->
     <div id="screen3" class="screen">
-        <h1>Congratulations! 🎉</h1>
+        <h1>Congratulations! ?</h1>
         <p>You found Boxy in all levels!</p>
         <div id="finalTime"></div>
+        <div id="leaderboard">
+            <h2>Leaderboard</h2>
+            <div id="leaderboardInstructions">Finish LEVEL 10 in the fastest time to get on the leaderboard!</div>
+            <ol id="leaderboardList"></ol>
+        </div>
         <button onclick="resetGame()">Play Again</button>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal">
+        <h2>Leaderboard</h2>
+        <div id="leaderboardInstructions2">Finish LEVEL 20 in the fastest time to get on the leaderboard!</div>
+        <ol id="modalLeaderboardList"></ol>
+        <button id="closeLeaderboard" onclick="closeLeaderboard()">Close</button>
     </div>
 
     <!-- Twinkling Stars -->
@@ -156,8 +214,13 @@
         const timerDiv = document.getElementById('timer');
         const finalTimeDiv = document.getElementById('finalTime');
         const boxySpeechDiv = document.getElementById('boxySpeech');
-        const starsDiv = document.getElementById('stars');
         const startScreen = document.getElementById('startScreen');
+        const screen1 = document.getElementById('screen1');
+        const screen2 = document.getElementById('screen2');
+        const screen3 = document.getElementById('screen3');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const modalLeaderboardList = document.getElementById('modalLeaderboardList');
+        const leaderboardModal = document.getElementById('leaderboardModal');
 
         let gridSize = 6; // Starting grid size (6x6)
         let level = 1; // Starting level
@@ -166,6 +229,65 @@
         let timer = 0; // Timer in seconds (with decimals)
         let totalTime = 0; // Cumulative time across all levels
         let timerInterval = null; // Interval for the timer
+        let leaderboard = []; // Stores the top 3 fastest times and usernames
+
+        // Load leaderboard from localStorage
+        function loadLeaderboard() {
+            const storedLeaderboard = localStorage.getItem('leaderboard');
+            if (storedLeaderboard) {
+                leaderboard = JSON.parse(storedLeaderboard);
+            }
+        }
+
+        // Save leaderboard to localStorage
+        function saveLeaderboard() {
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        // Clear the leaderboard
+        function clearLeaderboard() {
+            leaderboard = [];
+            saveLeaderboard();
+            displayLeaderboard(leaderboardList);
+            displayLeaderboard(modalLeaderboardList);
+        }
+
+        // Display the leaderboard
+        function displayLeaderboard(listElement) {
+            listElement.innerHTML = '';
+            leaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${entry.username}: ${entry.time.toFixed(2)}s`;
+                listElement.appendChild(li);
+            });
+        }
+
+        // Check if the user qualifies for the leaderboard
+        function checkLeaderboard() {
+            if (leaderboard.length < 10 || totalTime < leaderboard[leaderboard.length - 1].time) {
+                const username = prompt(`You made it to the leaderboard! Enter your username:`);
+                if (username) {
+                    leaderboard.push({ username, time: totalTime });
+                    leaderboard.sort((a, b) => a.time - b.time); // Sort by fastest time
+                    if (leaderboard.length > 10) {
+                        leaderboard.pop(); // Keep only the top 3
+                    }
+                    saveLeaderboard();
+                    displayLeaderboard(leaderboardList);
+                }
+            }
+        }
+
+        // Show the leaderboard modal
+        function viewLeaderboard() {
+            displayLeaderboard(modalLeaderboardList);
+            leaderboardModal.style.display = 'block';
+        }
+
+        // Close the leaderboard modal
+        function closeLeaderboard() {
+            leaderboardModal.style.display = 'none';
+        }
 
         // Generate random colors for BoxyGrid
         function generateBoxyGrid() {
@@ -243,8 +365,12 @@
                 stopTimer(); // Stop the timer when the user wins
                 totalTime += timer; // Add the level time to the total time
 
-                if (level === 12) {
-                    // Show final screen after Level 12
+                if (level === 20) { // Check if the user qualifies for the leaderboard at Level 20
+                    checkLeaderboard();
+                }
+
+                if (level === 20) {
+                    // Show final screen after Level 20
                     showFinalScreen();
                 } else {
                     setTimeout(() => {
@@ -261,9 +387,10 @@
 
         // Show the final screen with total time
         function showFinalScreen() {
-            document.getElementById('screen2').classList.remove('active');
-            document.getElementById('screen3').classList.add('active');
+            screen2.style.display = "none";
+            screen3.style.display = "block";
             finalTimeDiv.textContent = `Total Time: ${totalTime.toFixed(2)}s`;
+            displayLeaderboard(leaderboardList); // Display the leaderboard
         }
 
         // Reset the game to the initial state
@@ -274,7 +401,7 @@
             resetTimer(); // Reset the timer
             showBoxyScreen();
             messageDiv.textContent = "";
-            document.getElementById('screen3').classList.remove('active');
+            screen3.style.display = "none";
         }
 
         // Helper function to generate random colors
@@ -287,16 +414,19 @@
 
         // Switch to the Boxy screen
         function showBoxyScreen() {
-            document.getElementById('screen1').classList.add('active');
-            document.getElementById('screen2').classList.remove('active');
+            startScreen.style.display = "none";
+            screen1.style.display = "block";
+            screen2.style.display = "none";
+            screen3.style.display = "none";
             generateBoxyGrid(); // Generate a new Boxy for the next level
             boxySpeechDiv.textContent = "Remember my colours!";
         }
 
         // Switch to the grid canvas screen
         function showGridCanvas() {
-            document.getElementById('screen1').classList.remove('active');
-            document.getElementById('screen2').classList.add('active');
+            screen1.style.display = "none";
+            screen2.style.display = "block";
+            screen3.style.display = "none";
             generateGridCanvas();
             startTimer(); // Start the timer when the grid screen is shown
             gridCanvas.addEventListener('click', checkClick);
@@ -304,7 +434,7 @@
 
         // Start the game from the start screen
         function startGame() {
-            startScreen.classList.remove('active'); // Hide the start screen
+            startScreen.style.display = "none";
             showBoxyScreen(); // Show the Boxy screen
         }
 
@@ -321,6 +451,8 @@
         }
 
         // Initialize the game
+        loadLeaderboard();
+        clearLeaderboard(); // Clear the leaderboard records
         createStars();
     </script>
 </body>
