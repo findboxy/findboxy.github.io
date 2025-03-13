@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Find Boxy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        canvas {
+            border: 2px solid #333;
+            margin: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+        #message {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px;
+            color: #2c3e50;
+        }
+        #level {
+            font-size: 20px;
+            margin: 10px;
+            color: #2980b9;
+        }
+        #timer {
+            font-size: 20px;
+            margin: 10px;
+            color: #e67e22;
+        }
+        #boxySpeech {
+            font-size: 20px;
+            margin: 10px;
+            color: #2c3e50;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Screen 1: BoxyGrid -->
+    <div id="screen1" class="screen active">
+        <h1>Welcome to Find Boxy!</h1>
+        <div id="boxySpeech">Remember my colours!</div>
+        <canvas id="boxyGrid" width="100" height="100"></canvas>
+        <br>
+        <button onclick="showGridCanvas()">Next</button>
+        <div id="timer">Time: 0.00s</div>
+    </div>
+
+    <!-- Screen 2: GridCanvas -->
+    <div id="screen2" class="screen">
+        <h1>Find Boxy in the Grid!</h1>
+        <div id="level">Level 1 - Grid Size: 6x6</div>
+        <canvas id="gridCanvas" width="400" height="400"></canvas>
+        <div id="message"></div>
+        <button onclick="resetGame()">Restart Game</button>
+        <div id="timer">Time: 0.00s</div>
+    </div>
+
+    <!-- Screen 3: Final Screen -->
+    <div id="screen3" class="screen">
+        <h1>Congratulations! 🎉</h1>
+        <p>You found Boxy in all levels!</p>
+        <div id="finalTime"></div>
+        <button onclick="resetGame()">Play Again</button>
+    </div>
+
+    <script>
+        const boxyGridCanvas = document.getElementById('boxyGrid');
+        const boxyCtx = boxyGridCanvas.getContext('2d');
+        const gridCanvas = document.getElementById('gridCanvas');
+        const gridCtx = gridCanvas.getContext('2d');
+        const messageDiv = document.getElementById('message');
+        const levelDiv = document.getElementById('level');
+        const timerDiv = document.getElementById('timer');
+        const finalTimeDiv = document.getElementById('finalTime');
+        const boxySpeechDiv = document.getElementById('boxySpeech');
+
+        let gridSize = 6; // Starting grid size (6x6)
+        let level = 1; // Starting level
+        let boxyColors = []; // Stores the colors of the 2x2 BoxyGrid
+        let boxyPosition = { x: 0, y: 0 }; // Position of BoxyGrid in the larger grid
+        let timer = 0; // Timer in seconds (with decimals)
+        let totalTime = 0; // Cumulative time across all levels
+        let timerInterval = null; // Interval for the timer
+
+        // Generate random colors for BoxyGrid
+        function generateBoxyGrid() {
+            boxyColors = [];
+            for (let row = 0; row < 2; row++) {
+                for (let col = 0; col < 2; col++) {
+                    const color = getRandomColor();
+                    boxyColors.push(color);
+                    boxyCtx.fillStyle = color;
+                    boxyCtx.fillRect(col * 50, row * 50, 50, 50);
+                }
+            }
+        }
+
+        // Generate the grid with BoxyGrid hidden somewhere
+        function generateGridCanvas() {
+            const squareSize = gridCanvas.width / gridSize; // Calculate square size dynamically
+            gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+
+            // Randomly place BoxyGrid in the larger grid
+            boxyPosition.x = Math.floor(Math.random() * (gridSize - 1));
+            boxyPosition.y = Math.floor(Math.random() * (gridSize - 1));
+
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    // Check if this is part of BoxyGrid
+                    if (row >= boxyPosition.y && row < boxyPosition.y + 2 &&
+                        col >= boxyPosition.x && col < boxyPosition.x + 2) {
+                        const index = (row - boxyPosition.y) * 2 + (col - boxyPosition.x);
+                        gridCtx.fillStyle = boxyColors[index];
+                    } else {
+                        gridCtx.fillStyle = getRandomColor();
+                    }
+                    gridCtx.fillRect(col * squareSize, row * squareSize, squareSize - 1, squareSize - 1);
+                }
+            }
+
+            // Update level label
+            levelDiv.textContent = `Level ${level} - Grid Size: ${gridSize}x${gridSize}`;
+        }
+
+        // Start the timer
+        function startTimer() {
+            timer = 0; // Reset the timer for the current level
+            timerInterval = setInterval(() => {
+                timer += 0.01; // Increment by 0.01 seconds (10ms)
+                timerDiv.textContent = `Time: ${(totalTime + timer).toFixed(2)}s`; // Show cumulative time
+            }, 10); // Update every 10ms
+        }
+
+        // Stop the timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // Reset the timer
+        function resetTimer() {
+            stopTimer();
+            timer = 0;
+            totalTime = 0;
+            timerDiv.textContent = `Time: 0.00s`;
+        }
+
+        // Check if the user clicked on BoxyGrid
+        function checkClick(event) {
+            const rect = gridCanvas.getBoundingClientRect();
+            const squareSize = gridCanvas.width / gridSize;
+            const x = Math.floor((event.clientX - rect.left) / squareSize);
+            const y = Math.floor((event.clientY - rect.top) / squareSize);
+
+            if (x >= boxyPosition.x && x < boxyPosition.x + 2 &&
+                y >= boxyPosition.y && y < boxyPosition.y + 2) {
+                messageDiv.textContent = "You found me!";
+                messageDiv.style.color = "#27ae60";
+                stopTimer(); // Stop the timer when the user wins
+                totalTime += timer; // Add the level time to the total time
+
+                if (level === 12) {
+                    // Show final screen after Level 12
+                    showFinalScreen();
+                } else {
+                    setTimeout(() => {
+                        level++;
+                        gridSize++;
+                        showBoxyScreen(); // Return to Boxy screen for the next level
+                    }, 1000); // Wait 1 second before advancing to the next level
+                }
+            } else {
+                messageDiv.textContent = "Keep Looking!";
+                messageDiv.style.color = "#e74c3c";
+            }
+        }
+
+        // Show the final screen with total time
+        function showFinalScreen() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screen3').classList.add('active');
+            finalTimeDiv.textContent = `Total Time: ${totalTime.toFixed(2)}s`;
+        }
+
+        // Reset the game to the initial state
+        function resetGame() {
+            gridSize = 6;
+            level = 1;
+            totalTime = 0;
+            resetTimer(); // Reset the timer
+            showBoxyScreen();
+            messageDiv.textContent = "";
+            document.getElementById('screen3').classList.remove('active');
+        }
+
+        // Helper function to generate random colors
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r},${g},${b})`;
+        }
+
+        // Switch to the Boxy screen
+        function showBoxyScreen() {
+            document.getElementById('screen1').classList.add('active');
+            document.getElementById('screen2').classList.remove('active');
+            generateBoxyGrid(); // Generate a new Boxy for the next level
+            boxySpeechDiv.textContent = "Remember my colours!";
+        }
+
+        // Switch to the grid canvas screen
+        function showGridCanvas() {
+            document.getElementById('screen1').classList.remove('active');
+            document.getElementById('screen2').classList.add('active');
+            generateGridCanvas();
+            startTimer(); // Start the timer when the grid screen is shown
+            gridCanvas.addEventListener('click', checkClick);
+        }
+
+        // Initialize the game
+        generateBoxyGrid();
+    </script>
+</body>
+</html>
