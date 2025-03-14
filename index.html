@@ -121,10 +121,10 @@
 
 @keyframes confetti-fall {
 	    0% {
-        transform: translateY(100vh) rotate(0deg); /* Start at the bottom */
+        transform: translateY(0) rotate(0deg); /* Start at the bottom */
     }
     100% {
-        transform: translateY(0) rotate(720deg); /* Rise to the top */
+        transform: translateY(100vh) rotate(720deg); /* Rise to the top */
     }
 	
 }
@@ -218,6 +218,7 @@
             <ol id="leaderboardList"></ol>
 			</div>
         <button onclick="resetGame()">Play Again</button>
+        <button onclick="infiniteMode()">Continue in infinite mode!</button>
 	</div>
 	
 	<!-- Leaderboard Modal -->
@@ -411,11 +412,17 @@
                 messageDiv.style.color = "#FF6F61";
             }
         }
+        
+        function infiniteMode(){
+            level++;
+            gridSize++;
+            showBoxyScreen();
+            }
 
         // Show the final screen with total time
         function showFinalScreen() {
             screen2.style.display = "none";
-            screen3.style.display = "block";
+            screen3.style.display = "flex";
             finalTimeDiv.textContent = `Total Time: ${totalTime.toFixed(2)}s`;
 			displayLeaderboard(leaderboardList); // Display the leaderboard
 			checkLeaderboard();
