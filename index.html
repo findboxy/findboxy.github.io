@@ -371,7 +371,7 @@
 
                 if (level === 10) {
                     // Show final screen after Level 10
-					checkLeaderboard();
+					
                     showFinalScreen();
                 } else {
                     setTimeout(() => {
@@ -392,6 +392,7 @@
             screen3.style.display = "block";
             finalTimeDiv.textContent = `Total Time: ${totalTime.toFixed(2)}s`;
 			displayLeaderboard(leaderboardList); // Display the leaderboard
+			checkLeaderboard();
         }
 
         // Reset the game to the initial state
