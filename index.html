@@ -105,6 +105,25 @@
             0%, 100% { opacity: 0; }
             50% { opacity: 1; }
         }
+		
+		.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #ff0;
+    border-radius: 50%;
+    animation: confetti-fall 2s ease-out;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+    }
+}
+		
 		#leaderboard {
             margin: 20px;
             font-size: 20px;
@@ -366,6 +385,7 @@
                 y >= boxyPosition.y && y < boxyPosition.y + 2) {
                 messageDiv.textContent = "You found me!";
                 messageDiv.style.color = "#FFD700";
+				triggerConfetti();
                 stopTimer(); // Stop the timer when the user wins
                 totalTime += timer; // Add the level time to the total time
 
@@ -451,6 +471,35 @@
                 starsDiv.appendChild(star);
             }
         }
+		
+		function triggerConfetti() {
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none'; // Ensure it doesn't block clicks
+    document.body.appendChild(container);
+
+    const numberOfConfetti = 100;
+
+    for (let i = 0; i < numberOfConfetti; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.animationDuration = `${Math.random() * 2 + 1}s`;
+        container.appendChild(confetti);
+
+        confetti.addEventListener('animationend', () => {
+            confetti.remove();
+            if (container.children.length === 0) {
+                container.remove(); // Remove the container when all confetti is gone
+            }
+        });
+    }
+}
 
         // Initialize the game
         loadLeaderboard();
