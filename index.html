@@ -39,7 +39,9 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 100vh;
+			justify-content: center;
+            align-items: center;
             background: transparent;
         }
         .screen.active {
@@ -116,12 +118,13 @@
 }
 
 @keyframes confetti-fall {
-    0% {
-        transform: translateY(0) rotate(0deg);
+	    0% {
+        transform: translateY(100vh) rotate(0deg); /* Start at the bottom */
     }
     100% {
-        transform: translateY(100vh) rotate(720deg);
+        transform: translateY(0) rotate(720deg); /* Rise to the top */
     }
+	
 }
 		
 		#leaderboard {
@@ -183,8 +186,9 @@
 
     <!-- Screen 1: BoxyGrid -->
     <div id="screen1" class="screen">
-        <h1>Welcome to Find Boxy!</h1>
-        <div id="boxySpeech">Remember my colours!</div>
+        <h1>Here's Boxy!</h1>
+        <div id="boxySpeech">Remember my colours, and find me in the grid!
+		</div>
         <canvas id="boxyGrid" width="100" height="100"></canvas>
         <br>
         <button onclick="showGridCanvas()">Next</button>
