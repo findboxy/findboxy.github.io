@@ -34,7 +34,7 @@
             background: #FF3B2F;
         }
         .screen {
-            display: flex;
+
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -121,13 +121,42 @@
 
 @keyframes confetti-fall {
 	    0% {
-        transform: translateY(100vh) rotate(0deg); /* Start at the bottom */
+        transform: translateY(0) rotate(0deg); /* Start at the bottom */
     }
     100% {
-        transform: translateY(0) rotate(720deg); /* Rise to the top */
+        transform: translateY(100vh) rotate(720deg); /* Rise to the top */
     }
 	
 }
+		.firework {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: #ff0;
+    border-radius: 50%;
+    animation: explode 1.5s ease-out forwards;
+}
+
+@keyframes launch {
+    0% {
+        transform: translateY(100vh);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes explode {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(10);
+        opacity: 0;
+    }
+}
+		
 		
 		#leaderboard {
             margin: 20px;
@@ -218,6 +247,7 @@
             <ol id="leaderboardList"></ol>
 			</div>
         <button onclick="resetGame()">Play Again</button>
+		<button onclick="infiniteMode()">Continue in infinite mode!</button>
 	</div>
 	
 	<!-- Leaderboard Modal -->
@@ -275,7 +305,7 @@
 
         // Clear the leaderboard
         function clearLeaderboard() {
-            leaderboard = [];
+            //leaderboard = [];
             saveLeaderboard();
             displayLeaderboard(leaderboardList);
             displayLeaderboard(modalLeaderboardList);
@@ -392,6 +422,7 @@
                 messageDiv.textContent = "You found me!";
                 messageDiv.style.color = "#FFD700";
 				triggerConfetti();
+				launchFirework();
                 stopTimer(); // Stop the timer when the user wins
                 totalTime += timer; // Add the level time to the total time
 
@@ -415,11 +446,24 @@
         // Show the final screen with total time
         function showFinalScreen() {
             screen2.style.display = "none";
-            screen3.style.display = "block";
+            screen3.style.display = "flex";
             finalTimeDiv.textContent = `Total Time: ${totalTime.toFixed(2)}s`;
 			displayLeaderboard(leaderboardList); // Display the leaderboard
 			checkLeaderboard();
         }
+		
+		// Infinite Mode
+		function infiniteMode() {
+		{
+                    setTimeout(() => {
+                        level++;
+                        gridSize++;
+                        showBoxyScreen(); // Return to Boxy screen for the next level
+                    }, 10); // Wait 0 second before advancing to the next level
+                }
+		}
+		
+		
 
         // Reset the game to the initial state
         function resetGame() {
@@ -506,9 +550,54 @@
         });
     }
 }
+		
+
+		function launchFirework() {
+    const firework = document.createElement('div');
+    firework.classList.add('firework');
+    firework.style.left = `${Math.random() * 100}vw`; // Random horizontal position
+    firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`; // Random color
+    container.appendChild(firework);
+
+    // Launch phase
+    firework.style.animation = 'launch 1s ease-out forwards';
+
+    // Explode after launch
+    setTimeout(() => {
+        firework.style.animation = 'explode 1s ease-out forwards';
+        createExplosion(firework.offsetLeft, firework.offsetTop);
+        firework.remove();
+    }, 1000);
+}
+
+function createExplosion(x, y) {
+    const container = document.getElementById('fireworksContainer');
+    const numberOfParticles = 50;
+
+    for (let i = 0; i < numberOfParticles; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('firework');
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particle.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        particle.style.animation = `explode ${Math.random() * 1 + 0.5}s ease-out forwards`;
+        container.appendChild(particle);
+
+        // Random direction for particles
+        const angle = (Math.random() * 360) * (Math.PI / 180);
+        const distance = Math.random() * 100;
+        particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+
+        // Remove particle after animation
+        particle.addEventListener('animationend', () => {
+            particle.remove();
+        });
+    }
+}
 
         // Initialize the game
         loadLeaderboard();
+        //clearLeaderboard(); // Clear the leaderboard records
 		createStars();
     </script>
 </body>
