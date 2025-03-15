@@ -6,19 +6,69 @@
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
         body {
-            font-family: 'Fredoka One', cursive;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background:#1A1A4E;
-            color: #FFFFFF;
-            overflow: hidden;
-        }
-        canvas {
-            border: 2px solid #FFFFFF;
-            margin: 10px;
-            background: transparent;
-        }
+    font-family: 'Fredoka One', cursive;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background: #1A1A4E;
+    color: #FFFFFF;
+    overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: transparent;
+    padding: 10px; /* Add some padding for margin */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.screen.active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: transparent;
+    padding: 10px; /* Add some padding for margin */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+canvas {
+    border: 2px solid #FFFFFF;
+    margin: 10px;
+    background: transparent;
+    max-width: 100%; /* Make canvas responsive */
+    height: auto; /* Maintain aspect ratio */
+}
+
+@media only screen and (max-width: 600px) {
+    h1 {
+        font-size: 48px; /* Smaller font size for mobile */
+    }
+    p, button, #message, #level, #timer, #boxySpeech {
+        font-size: 16px; /* Smaller font size for mobile */
+    }
+    canvas {
+        width: 90%; /* Make canvas fill the screen with margin */
+    }
+}
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
         button {
             padding: 8px 16px;
             font-size: 16px;
@@ -33,22 +83,7 @@
         button:hover {
             background: #FF3B2F;
         }
-        .screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: transparent;
-        }
-        .screen.active {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: transparent;
-        }
+
         #message {
             font-size: 24px;
             font-weight: bold;
