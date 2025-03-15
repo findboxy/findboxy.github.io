@@ -542,7 +542,21 @@ canvas {
             showBoxyScreen(); // Show the Boxy screen
         }
         
-        		function launchFirework() {
+function launchFirework() {
+    // Create or reference the container for fireworks
+    let container = document.getElementById('fireworksContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'fireworksContainer';
+        container.style.position = 'fixed';
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.pointerEvents = 'none'; // Ensure it doesn't block clicks
+        document.body.appendChild(container);
+    }
+
     const firework = document.createElement('div');
     firework.classList.add('firework');
     firework.style.left = `${Math.random() * 100}vw`; // Random horizontal position
