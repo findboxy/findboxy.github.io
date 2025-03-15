@@ -194,7 +194,7 @@
         <canvas id="boxyGrid" width="100" height="100"></canvas>
         <br>
         <button onclick="showGridCanvas()">Next</button>
-        <div id="timer2">Time: 0.00s</div>
+        <div id="runTime">Time: 0.00s</div>
     </div>
 
     <!-- Screen 2: GridCanvas -->
@@ -240,6 +240,7 @@
         const messageDiv = document.getElementById('message');
         const levelDiv = document.getElementById('level');
         const timerDiv = document.getElementById('timer');
+        const runTimeDiv = document.getElementById('runTime');
         const finalTimeDiv = document.getElementById('finalTime');
         const boxySpeechDiv = document.getElementById('boxySpeech');
         const starsDiv = document.getElementById('stars');
@@ -454,6 +455,7 @@
             screen2.style.display = "none";
             screen3.style.display = "none";
             generateBoxyGrid(); // Generate a new Boxy for the next level
+            runTimDiv.textcontent = `Total Time: ${totalTime.toFixed(2)}s`;
             boxySpeechDiv.textContent = "Remember my colours!";
         }
 
