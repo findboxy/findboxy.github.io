@@ -189,7 +189,9 @@
     <!-- Screen 1: BoxyGrid -->
     <div id="screen1" class="screen">
         <h1>Here's Boxy!</h1>
-        <div id="boxySpeech">Remember my colours, and find me in the grid!
+        <div id="boxySpeech">
+            <p>Remember my colours, </p>
+            <p>and find me in the grid!</p>
 		</div>
         <canvas id="boxyGrid" width="100" height="100"></canvas>
         <br>
@@ -455,7 +457,7 @@
             screen2.style.display = "none";
             screen3.style.display = "none";
             generateBoxyGrid(); // Generate a new Boxy for the next level
-            runTimDiv.textcontent = `Total Time: ${totalTime.toFixed(2)}s`;
+            runTimDiv.textcontent = `Time: ${totalTime.toFixed(2)}s`;
             boxySpeechDiv.textContent = "Remember my colours!";
         }
 
